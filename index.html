@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wedding Invitation | Zaryab & Abu Bakar</title>
+    <title>The Royal Wedding | Zaryab & Abu Bakar</title>
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,400&family=Pinyon+Script&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --bg-dark: #0a0204;
-            --bg-card: rgba(28, 8, 14, 0.75);
+            --bg-deep: #070103;
+            --bg-card: rgba(23, 5, 10, 0.75);
             --gold-light: #fbe3ad;
             --gold-metallic: #d4af37;
             --gold-dark: #8c6d1d;
-            --maroon-deep: #5e111b;
+            --maroon-deep: #3b070d;
+            --maroon-glow: #6e0f1b;
             --text-light: #ffffff;
-            --text-dim: #cbb89d;
+            --text-dim: #d8c4a6;
             --font-display: 'Cinzel Decorative', serif;
-            --font-heading: 'Playfair Display', serif;
+            --font-heading: 'Cormorant Garamond', serif;
+            --font-script: 'Pinyon Script', cursive;
             --font-body: 'Plus Jakarta Sans', sans-serif;
         }
 
@@ -32,27 +34,29 @@
         }
 
         body {
-            background-color: var(--bg-dark);
+            background-color: var(--bg-deep);
             color: var(--text-light);
             font-family: var(--font-body);
             overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 20%, rgba(110, 15, 27, 0.25) 0%, transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
         }
 
-        /* --- 1. ENTRANCE OVERLAY & FIREWORKS --- */
-        #entrance-overlay {
+        /* --- 1. 3D GRAND ENTRANCE & FLY-THROUGH SCENE --- */
+        #entrance-wrapper {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
             z-index: 99999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            perspective: 1200px;
             overflow: hidden;
+            background: #000;
         }
 
-        #entranceFireworksCanvas {
+        #fireworksCanvas {
             position: absolute;
             top: 0;
             left: 0;
@@ -62,193 +66,290 @@
             pointer-events: none;
         }
 
-        /* SPLIT DOORS ANIMATION */
-        .door {
+        /* Ambient Garden Layer Behind Gates */
+        .garden-backdrop {
             position: absolute;
             top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(to bottom, rgba(7, 1, 3, 0.3), rgba(7, 1, 3, 0.8)),
+                radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.2), transparent 70%),
+                url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+            z-index: 1;
+            transform: scale(1.1);
+            transition: transform 2.5s cubic-bezier(0.25, 1, 0.5, 1), filter 2s ease;
+            filter: brightness(0.6) blur(2px);
+        }
+
+        /* 3D Gate Doors */
+        .gate-viewport {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            display: flex;
+            transform-style: preserve-3d;
+        }
+
+        .gate-panel {
             width: 50%;
             height: 100%;
-            background: linear-gradient(135deg, #1c050a 0%, #0a0204 100%);
-            border: 2px solid var(--gold-metallic);
-            z-index: 1;
-            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
-            box-shadow: inset 0 0 80px rgba(0,0,0,0.9);
+            background: 
+                linear-gradient(135deg, rgba(28, 5, 10, 0.97) 0%, rgba(10, 2, 4, 0.98) 100%),
+                repeating-linear-gradient(45deg, rgba(212, 175, 55, 0.03) 0, rgba(212, 175, 55, 0.03) 10px, transparent 10px, transparent 20px);
+            border: 3px solid var(--gold-metallic);
+            position: relative;
+            transition: transform 2.2s cubic-bezier(0.65, 0, 0.07, 1);
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.95);
         }
 
-        .door.left-door { left: 0; border-right: 3px solid var(--gold-metallic); }
-        .door.right-door { right: 0; border-left: 3px solid var(--gold-metallic); }
+        .gate-left {
+            transform-origin: left center;
+            border-right: 4px solid var(--gold-light);
+        }
 
-        .door-content {
-            position: relative;
+        .gate-right {
+            transform-origin: right center;
+            border-left: 4px solid var(--gold-light);
+        }
+
+        /* Gate Filigree Patterns */
+        .gate-pattern {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80%;
+            height: 70%;
+            border: 2px dashed rgba(212, 175, 55, 0.4);
+            margin: 0 10%;
+            border-radius: 200px 200px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Floating Center Seal & OPEN Button */
+        .entrance-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 10;
             text-align: center;
-            padding: 40px;
-            background: rgba(10, 2, 4, 0.85);
-            border: 2px solid var(--gold-metallic);
-            border-radius: 20px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 0 50px rgba(212, 175, 55, 0.3);
-            max-width: 500px;
-            width: 90%;
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transition: opacity 0.8s ease, transform 1s ease;
         }
 
-        .door-title {
+        .royal-seal {
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--gold-light) 0%, var(--gold-dark) 100%);
+            border: 4px solid var(--gold-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+            animation: pulseGlow 2.5s infinite alternate;
+        }
+
+        .royal-seal i {
+            font-size: 3rem;
+            color: var(--bg-deep);
+        }
+
+        .entrance-title {
             font-family: var(--font-display);
-            font-size: 2.2rem;
+            font-size: clamp(1.8rem, 4vw, 3rem);
             color: var(--gold-light);
-            margin-bottom: 10px;
-            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+            margin-bottom: 8px;
+            letter-spacing: 2px;
         }
 
-        .door-subtitle {
-            font-family: var(--font-heading);
+        .entrance-sub {
+            font-family: var(--font-script);
+            font-size: 2.2rem;
             color: var(--text-dim);
-            font-style: italic;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
         }
 
-        /* OPEN BUTTON */
-        .btn-open {
-            padding: 18px 60px;
-            background: linear-gradient(45deg, var(--gold-dark), var(--gold-metallic), var(--gold-light));
-            background-size: 200% 200%;
-            border: none;
-            color: var(--bg-dark);
+        .btn-open-gate {
+            position: relative;
+            padding: 20px 70px;
             font-family: var(--font-display);
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 900;
-            letter-spacing: 4px;
+            letter-spacing: 6px;
+            color: var(--bg-deep);
+            background: linear-gradient(135deg, #fbe3ad 0%, #d4af37 50%, #8c6d1d 100%);
+            border: none;
+            border-radius: 60px;
             cursor: pointer;
-            border-radius: 50px;
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.6);
-            transition: all 0.3s ease;
-            animation: pulseGlow 2s infinite alternate;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.7), inset 0 0 10px rgba(255,255,255,0.5);
+            transition: all 0.4s ease;
+            overflow: hidden;
         }
 
-        .btn-open:hover {
-            transform: scale(1.08);
-            box-shadow: 0 0 50px rgba(251, 227, 173, 0.9);
+        .btn-open-gate:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 60px rgba(251, 227, 173, 0.95);
         }
 
-        @keyframes pulseGlow {
-            0% { background-position: 0% 50%; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
-            100% { background-position: 100% 50%; box-shadow: 0 0 40px rgba(212, 175, 55, 0.8); }
+        /* FLY-THROUGH ACTIVE ANIMATION CLASSES */
+        .fly-through .gate-left { transform: rotateY(-115deg); }
+        .fly-through .gate-right { transform: rotateY(115deg); }
+        .fly-through .garden-backdrop { transform: scale(1.8); filter: brightness(1) blur(0px); }
+        .fly-through .entrance-center { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+
+        /* --- 2. MAIN APP & NAVIGATION --- */
+        #main-app {
+            opacity: 0;
+            transition: opacity 1.5s ease 1s;
+            position: relative;
+            z-index: 10;
         }
 
-        /* --- BACKGROUND PARTICLES --- */
-        #bgCanvas {
+        #petalsCanvas {
             position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: 1;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             pointer-events: none;
+            z-index: 2;
         }
 
-        /* --- NAV --- */
         nav {
             position: fixed;
-            top: 0; width: 100%;
-            padding: 20px 40px;
+            top: 0;
+            width: 100%;
+            padding: 25px 60px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 100;
-            background: rgba(10, 2, 4, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            background: rgba(7, 1, 3, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.25);
         }
 
-        .logo {
+        .brand-monogram {
             font-family: var(--font-display);
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             color: var(--gold-light);
             text-decoration: none;
+            letter-spacing: 2px;
         }
 
-        .nav-items {
+        .nav-links {
             display: flex;
-            gap: 25px;
+            gap: 35px;
             list-style: none;
         }
 
-        .nav-items a {
+        .nav-links a {
             color: var(--text-dim);
             text-decoration: none;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
+            font-size: 0.85rem;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            transition: color 0.3s ease;
+            transition: color 0.3s;
         }
 
-        .nav-items a:hover { color: var(--gold-light); }
+        .nav-links a:hover { color: var(--gold-light); }
 
-        /* --- HERO SECTION --- */
+        /* --- 3. HERO SECTION --- */
         header.hero {
-            position: relative;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 120px 20px 60px;
-            z-index: 2;
+            padding: 140px 20px 80px;
+            position: relative;
         }
 
-        .main-names {
+        .gold-ornament {
+            width: 180px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+
+        .couple-names {
             font-family: var(--font-display);
-            font-size: clamp(2.8rem, 6vw, 5.2rem);
+            font-size: clamp(3rem, 7vw, 6rem);
+            background: linear-gradient(135deg, #ffffff 0%, #fbe3ad 50%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-family: var(--font-script);
+            font-size: clamp(2.2rem, 4vw, 3.5rem);
             color: var(--gold-light);
-            text-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
-            margin-bottom: 15px;
+            margin-bottom: 30px;
         }
 
-        .tagline {
-            font-family: var(--font-heading);
-            font-size: 1.4rem;
-            color: var(--text-dim);
-            font-style: italic;
-            margin-bottom: 40px;
+        /* --- 4. HIGH-DETAILS SCRATCH CARD --- */
+        .scratch-card-box {
+            position: relative;
+            margin: 35px 0;
+            background: rgba(23, 5, 10, 0.9);
+            border: 2px solid var(--gold-metallic);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.9), 0 0 20px rgba(212, 175, 55, 0.2);
+            max-width: 400px;
+            width: 100%;
         }
 
-        /* --- 2. SCRATCH CARD FOR DATE REVEAL --- */
-        .scratch-card-wrapper {
-            margin: 30px 0;
-            text-align: center;
-        }
-
-        .scratch-card-title {
-            font-size: 0.85rem;
+        .scratch-instruction {
+            font-size: 0.75rem;
             letter-spacing: 3px;
             text-transform: uppercase;
             color: var(--gold-metallic);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
-        .scratch-container {
+        .scratch-area {
             position: relative;
-            width: 320px;
-            height: 110px;
-            margin: 0 auto;
-            border-radius: 15px;
+            width: 100%;
+            height: 120px;
+            border-radius: 12px;
             overflow: hidden;
-            border: 2px solid var(--gold-metallic);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            background: linear-gradient(135deg, #2b0b10, #120406);
             display: flex;
             align-items: center;
             justify-content: center;
+            background: linear-gradient(135deg, #1f050c, #0d0205);
         }
 
-        .revealed-date-text {
+        .date-behind {
             font-family: var(--font-heading);
-            font-size: 1.25rem;
             color: var(--gold-light);
-            font-weight: 700;
-            line-height: 1.4;
-            padding: 10px;
+            text-align: center;
             user-select: none;
+        }
+
+        .date-behind h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .date-behind p {
+            font-size: 1rem;
+            color: var(--text-dim);
+            font-style: italic;
         }
 
         #scratchCanvas {
@@ -261,526 +362,658 @@
             touch-action: none;
         }
 
-        /* COUNTDOWN */
-        .countdown-row {
+        /* COUNTDOWN DISPLAY */
+        .countdown-container {
             display: flex;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 20px;
+            margin-top: 25px;
         }
 
-        .count-box {
+        .time-card {
             background: var(--bg-card);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            padding: 15px;
-            border-radius: 10px;
-            min-width: 80px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            padding: 18px 22px;
+            border-radius: 12px;
+            min-width: 85px;
+            box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.1);
         }
 
-        .count-num {
-            font-family: var(--font-display);
-            font-size: 1.8rem;
-            color: var(--gold-light);
+        .time-card span {
             display: block;
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: var(--gold-light);
         }
 
-        .count-lbl {
+        .time-card label {
             font-size: 0.65rem;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            letter-spacing: 1px;
             color: var(--text-dim);
         }
 
-        /* --- SECTIONS --- */
+        /* --- 5. DETAILED SECTIONS & TIMELINE --- */
         section {
-            position: relative;
-            z-index: 2;
-            padding: 100px 20px;
-            max-width: 1100px;
+            padding: 120px 20px;
+            max-width: 1200px;
             margin: 0 auto;
-        }
-
-        .sec-header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .sec-title {
-            font-family: var(--font-heading);
-            font-size: 2.5rem;
-            color: var(--gold-light);
-        }
-
-        /* --- ROLLING CARS SCROLL TIMELINE --- */
-        .road-container {
             position: relative;
-            width: 100%;
-            height: 130px;
-            background: rgba(15, 3, 6, 0.9);
-            border-top: 2px solid var(--gold-metallic);
-            border-bottom: 2px solid var(--gold-metallic);
-            border-radius: 65px;
-            margin: 40px 0;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
 
-        .road-dashes {
-            position: absolute;
-            top: 50%;
-            width: 100%;
-            height: 2px;
-            background: repeating-linear-gradient(90deg, var(--gold-metallic) 0, var(--gold-metallic) 25px, transparent 25px, transparent 50px);
-            opacity: 0.3;
+        .section-header {
+            text-align: center;
+            margin-bottom: 70px;
         }
 
-        .rolling-car {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            left: 2%;
-            width: 110px;
-            height: 45px;
-            transition: left 0.1s linear;
-            filter: drop-shadow(0 0 10px var(--gold-metallic));
-        }
-
-        .timeline-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        .timeline-card {
-            background: var(--bg-card);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            padding: 30px;
-            border-radius: 15px;
-        }
-
-        .timeline-card h3 {
+        .section-title {
             font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 5vw, 3.8rem);
             color: var(--gold-light);
             margin-bottom: 10px;
         }
 
-        /* --- FUNCTIONS --- */
-        .events-grid {
+        .section-divider {
+            width: 120px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-metallic), transparent);
+            margin: 0 auto;
+        }
+
+        /* ROLLING CAR TRACK WITH HEADLIGHT BEAMS & ROTATING WHEELS */
+        .royal-track {
+            position: relative;
+            width: 100%;
+            height: 140px;
+            background: rgba(15, 3, 6, 0.85);
+            border: 2px solid var(--gold-metallic);
+            border-radius: 70px;
+            margin: 50px 0;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+
+        .track-line {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            height: 2px;
+            background: repeating-linear-gradient(90deg, var(--gold-metallic) 0, var(--gold-metallic) 30px, transparent 30px, transparent 60px);
+            opacity: 0.4;
+        }
+
+        .luxury-car-wrapper {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 2%;
+            width: 140px;
+            height: 60px;
+            transition: left 0.1s linear;
+        }
+
+        /* Headlight Glow Beam */
+        .headlight-beam {
+            position: absolute;
+            right: -60px;
+            top: 22px;
+            width: 80px;
+            height: 25px;
+            background: linear-gradient(90deg, rgba(251, 227, 173, 0.8) 0%, transparent 100%);
+            clip-path: polygon(0 30%, 100% 0, 100% 100%, 0 70%);
+            filter: blur(2px);
+        }
+
+        .car-wheel {
+            transform-origin: center;
+            animation: none;
+        }
+
+        .timeline-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
         }
 
-        .event-card {
+        .glass-card {
             background: var(--bg-card);
-            border: 1px solid var(--gold-metallic);
-            border-radius: 18px;
-            padding: 40px 25px;
-            text-align: center;
-            transition: transform 0.3s ease;
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 20px;
+            padding: 40px 30px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            transition: transform 0.4s ease, border-color 0.4s ease;
         }
 
-        .event-card:hover { transform: translateY(-8px); }
+        .glass-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--gold-metallic);
+            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.15);
+        }
 
-        .event-card h3 {
+        .glass-card h3 {
             font-family: var(--font-heading);
             font-size: 1.8rem;
             color: var(--gold-light);
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
-        .event-card p {
-            margin: 10px 0;
+        .glass-card p {
             color: var(--text-dim);
+            line-height: 1.6;
             font-size: 0.95rem;
         }
 
-        .btn-action {
+        /* --- 6. EVENT FUNCTIONS CARDS --- */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 35px;
+        }
+
+        .event-card-header {
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .event-time {
+            color: var(--gold-metallic);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .btn-gold-action {
             display: inline-block;
-            margin-top: 20px;
-            padding: 12px 30px;
+            margin-top: 25px;
+            padding: 14px 32px;
             border: 1px solid var(--gold-metallic);
             color: var(--gold-light);
             text-decoration: none;
-            border-radius: 6px;
+            border-radius: 30px;
             font-size: 0.8rem;
             letter-spacing: 2px;
             text-transform: uppercase;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
-        .btn-action:hover {
+        .btn-gold-action:hover {
             background: var(--gold-metallic);
-            color: var(--bg-dark);
+            color: var(--bg-deep);
             font-weight: 700;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
         }
 
-        /* --- RSVP & PRAYER WALL --- */
-        .rsvp-grid {
+        /* --- 7. RSVP & PRAYER STREAM --- */
+        .rsvp-wrapper {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            background: var(--bg-card);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            padding: 40px;
-            border-radius: 20px;
+            gap: 50px;
         }
 
-        @media (max-width: 800px) { .rsvp-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) { .rsvp-wrapper { grid-template-columns: 1fr; } }
 
-        .input-group { margin-bottom: 20px; }
-        .input-group label {
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
             display: block;
             font-size: 0.8rem;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             color: var(--gold-light);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
-        .input-group input, .input-group select, .input-group textarea {
+
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
-            padding: 14px;
-            background: rgba(10, 2, 4, 0.8);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 8px;
+            padding: 16px;
+            background: rgba(10, 2, 4, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
             color: #fff;
             font-family: var(--font-body);
+            outline: none;
+            transition: border-color 0.3s;
         }
 
-        .wish-list {
-            max-height: 320px;
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--gold-light);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .prayer-stream {
+            max-height: 380px;
             overflow-y: auto;
+            padding-right: 10px;
         }
 
-        .wish-item {
-            background: rgba(10, 2, 4, 0.6);
+        .prayer-card {
+            background: rgba(15, 3, 6, 0.7);
             border-left: 3px solid var(--gold-metallic);
-            padding: 15px;
-            margin-bottom: 12px;
-            border-radius: 0 8px 8px 0;
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 0 12px 12px 0;
         }
 
-        /* MUSIC WIDGET */
-        #musicToggle {
+        /* MUSIC CONTROLLER */
+        #musicBtn {
             position: fixed;
-            bottom: 25px;
-            right: 25px;
-            width: 55px; height: 55px;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: var(--bg-card);
             border: 2px solid var(--gold-metallic);
             color: var(--gold-light);
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             cursor: pointer;
-            z-index: 1000;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            z-index: 999;
+            box-shadow: 0 0 25px rgba(0,0,0,0.9);
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: transform 0.3s;
         }
+
+        #musicBtn:hover { transform: scale(1.1); }
 
         footer {
             text-align: center;
-            padding: 40px 20px;
+            padding: 50px 20px;
             border-top: 1px solid rgba(212, 175, 55, 0.2);
             color: var(--text-dim);
             font-size: 0.85rem;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+            100% { box-shadow: 0 0 50px rgba(212, 175, 55, 0.9); }
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. INTERACTIVE ENTRANCE SCREEN WITH LIVE FIREWORKS & DOUBLE DOORS -->
-    <div id="entrance-overlay">
-        <canvas id="entranceFireworksCanvas"></canvas>
-        <div class="door left-door" id="leftDoor"></div>
-        <div class="door right-door" id="rightDoor"></div>
+    <!-- 1. 3D GRAND ENTRANCE & FLY-THROUGH SCENE -->
+    <div id="entrance-wrapper">
+        <canvas id="fireworksCanvas"></canvas>
+        <div class="garden-backdrop" id="gardenBg"></div>
 
-        <div class="door-content" id="doorContent">
-            <h1 class="door-title">The Wedding Celebration</h1>
-            <p class="door-subtitle">Zaryab & Abu Bakar</p>
-            <button class="btn-open" onclick="openWeddingGate()">OPEN</button>
+        <div class="gate-viewport">
+            <div class="gate-panel gate-left">
+                <div class="gate-pattern"></div>
+            </div>
+            <div class="gate-panel gate-right">
+                <div class="gate-pattern"></div>
+            </div>
+        </div>
+
+        <div class="entrance-center" id="entranceCenter">
+            <div class="royal-seal">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <h1 class="entrance-title">The Royal Wedding</h1>
+            <p class="entrance-sub">Zaryab & Abu Bakar</p>
+            <button class="btn-open-gate" onclick="startFlyThrough()">OPEN</button>
         </div>
     </div>
 
-    <!-- BACKGROUND AMBIENT CANVAS -->
-    <canvas id="bgCanvas"></canvas>
+    <!-- 2. MAIN APPLICATION -->
+    <div id="main-app">
+        <canvas id="petalsCanvas"></canvas>
 
-    <!-- MUSIC PLAYER -->
-    <button id="musicToggle" onclick="toggleAudio()">♫</button>
-    <audio id="bgAudio" loop>
-        <source src="https://assets.mixkit.co/music/preview/mixkit-beautiful-dream-493.mp3" type="audio/mpeg">
-    </audio>
+        <button id="musicBtn" onclick="toggleAudio()"><i class="fa-solid fa-music"></i></button>
+        <audio id="bgAudio" loop>
+            <source src="https://assets.mixkit.co/music/preview/mixkit-beautiful-dream-493.mp3" type="audio/mpeg">
+        </audio>
 
-    <!-- NAV -->
-    <nav>
-        <a href="#hero" class="logo">Z & A</a>
-        <ul class="nav-items">
-            <li><a href="#hero">Home</a></li>
-            <li><a href="#journey">Journey</a></li>
-            <li><a href="#events">Functions</a></li>
-            <li><a href="#rsvp">RSVP</a></li>
-        </ul>
-    </nav>
+        <!-- NAVIGATION -->
+        <nav>
+            <a href="#hero" class="brand-monogram">Z & A</a>
+            <ul class="nav-links">
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#journey">Journey</a></li>
+                <li><a href="#events">Functions</a></li>
+                <li><a href="#rsvp">RSVP</a></li>
+            </ul>
+        </nav>
 
-    <!-- HERO SECTION -->
-    <header class="hero" id="hero">
-        <h1 class="main-names">Zaryab & Abu Bakar</h1>
-        <p class="tagline">"Two contrasting worlds unite in endless love & faith."</p>
-
-        <!-- 2. INTERACTIVE SCRATCH CARD FOR DATE REVEAL -->
-        <div class="scratch-card-wrapper">
-            <p class="scratch-card-title">✨ Scratch the gold foil below to reveal the date ✨</p>
-            <div class="scratch-container">
-                <div class="revealed-date-text">
-                    Saturday, Nov 28, 2026<br>
-                    <span style="font-size: 0.9rem; color: var(--gold-metallic);">At 7:00 PM in the Evening</span>
-                </div>
-                <canvas id="scratchCanvas" width="320" height="110"></canvas>
-            </div>
-        </div>
-
-        <!-- COUNTDOWN TIMER -->
-        <div class="countdown-row">
-            <div class="count-box"><span class="count-num" id="days">00</span><span class="count-lbl">Days</span></div>
-            <div class="count-box"><span class="count-num" id="hours">00</span><span class="count-lbl">Hours</span></div>
-            <div class="count-box"><span class="count-num" id="mins">00</span><span class="count-lbl">Mins</span></div>
-            <div class="count-box"><span class="count-num" id="secs">00</span><span class="count-lbl">Secs</span></div>
-        </div>
-    </header>
-
-    <!-- SCROLL-DRIVEN ROLLING CAR TIMELINE -->
-    <section id="journey">
-        <div class="sec-header">
-            <h2 class="sec-title">Our Journey</h2>
-            <p style="color: var(--text-dim);">Scroll down to watch the ride move</p>
-        </div>
-
-        <div class="road-container">
-            <div class="road-dashes"></div>
-            <!-- Dynamic Vector Vehicle -->
-            <svg class="rolling-car" id="scrollCar" viewBox="0 0 120 50">
-                <path d="M10,35 Q25,12 55,10 L90,15 Q115,20 118,35 L118,42 L10,42 Z" fill="#d4af37"/>
-                <circle cx="30" cy="42" r="7" fill="#0a0204" stroke="#d4af37" stroke-width="2"/>
-                <circle cx="90" cy="42" r="7" fill="#0a0204" stroke="#d4af37" stroke-width="2"/>
+        <!-- HERO SECTION -->
+        <header class="hero" id="hero">
+            <svg class="gold-ornament" viewBox="0 0 200 40">
+                <path d="M10,20 Q100,-10 190,20 Q100,50 10,20 Z" fill="none" stroke="#d4af37" stroke-width="2"/>
+                <circle cx="100" cy="20" r="5" fill="#fbe3ad"/>
             </svg>
-        </div>
 
-        <div class="timeline-grid">
-            <div class="timeline-card">
-                <h3>01. Two Parallel Paths</h3>
-                <p>Growing up in completely different spheres, led by distinct ambitions and values.</p>
-            </div>
-            <div class="timeline-card">
-                <h3>02. The Meeting</h3>
-                <p>Where modern life met tradition, creating a perfect balance of respect and harmony.</p>
-            </div>
-            <div class="timeline-card">
-                <h3>03. The Destination</h3>
-                <p>Stepping into forever together surrounded by the blessings of family and prayers.</p>
-            </div>
-        </div>
-    </section>
+            <h1 class="couple-names">Zaryab & Abu Bakar</h1>
+            <p class="hero-subtitle">Together in Love & Faith</p>
 
-    <!-- FUNCTIONS -->
-    <section id="events">
-        <div class="sec-header">
-            <h2 class="sec-title">The Wedding Functions</h2>
-        </div>
-
-        <div class="events-grid">
-            <div class="event-card">
-                <h3>Mehndi & Sangeet</h3>
-                <p><strong>Date:</strong> Thursday, Nov 26, 2026</p>
-                <p><strong>Time:</strong> 06:30 PM Onwards</p>
-                <p><strong>Venue:</strong> The Royal Marquee</p>
-                <a href="https://maps.google.com" target="_blank" class="btn-action">View Venue Map</a>
-            </div>
-
-            <div class="event-card" style="border-color: var(--gold-light);">
-                <h3>Baraat & Nikkah</h3>
-                <p><strong>Date:</strong> Saturday, Nov 28, 2026</p>
-                <p><strong>Time:</strong> 07:00 PM Onwards</p>
-                <p><strong>Venue:</strong> Grand Imperial Hall</p>
-                <a href="https://maps.google.com" target="_blank" class="btn-action">View Venue Map</a>
-            </div>
-
-            <div class="event-card">
-                <h3>Valima Reception</h3>
-                <p><strong>Date:</strong> Sunday, Nov 29, 2026</p>
-                <p><strong>Time:</strong> 08:00 PM Onwards</p>
-                <p><strong>Venue:</strong> The Imperial Courtyard</p>
-                <a href="https://maps.google.com" target="_blank" class="btn-action">View Venue Map</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- RSVP & PRAYER WALL -->
-    <section id="rsvp">
-        <div class="sec-header">
-            <h2 class="sec-title">RSVP & Prayer Wall</h2>
-        </div>
-
-        <div class="rsvp-grid">
-            <form onsubmit="submitWish(event)">
-                <div class="input-group">
-                    <label>Your Name</label>
-                    <input type="text" id="guestName" required placeholder="Enter your full name">
+            <!-- INTERACTIVE GOLD SCRATCH CARD -->
+            <div class="scratch-card-box">
+                <p class="scratch-instruction">✨ Scratch below to reveal the date ✨</p>
+                <div class="scratch-area">
+                    <div class="date-behind">
+                        <h3>SATURDAY, NOV 28, 2026</h3>
+                        <p>07:00 PM in the Evening</p>
+                    </div>
+                    <canvas id="scratchCanvas" width="380" height="120"></canvas>
                 </div>
-                <div class="input-group">
-                    <label>Attending Events</label>
-                    <select id="guestEvents">
-                        <option>All Events</option>
-                        <option>Baraat & Valima</option>
-                        <option>Baraat Only</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Your Blessing / Message</label>
-                    <textarea id="guestMsg" rows="4" required placeholder="Write your heartfelt wish..."></textarea>
-                </div>
-                <button type="submit" class="btn-action" style="background: var(--gold-metallic); color: var(--bg-dark); font-weight: 700; width: 100%;">Submit RSVP</button>
-            </form>
+            </div>
 
-            <div>
-                <h3 style="font-family: var(--font-heading); color: var(--gold-light); margin-bottom: 20px;">Guest Prayers</h3>
-                <div class="wish-list" id="wishList">
-                    <div class="wish-item">
-                        <strong style="color: var(--gold-light);">Amina & Bilal</strong>
-                        <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 4px;">"May Allah bless this union with eternal love, happiness, and peace!"</p>
+            <!-- COUNTDOWN TIMER -->
+            <div class="countdown-container">
+                <div class="time-card"><span id="cd-days">00</span><label>Days</label></div>
+                <div class="time-card"><span id="cd-hours">00</span><label>Hours</label></div>
+                <div class="time-card"><span id="cd-mins">00</span><label>Mins</label></div>
+                <div class="time-card"><span id="cd-secs">00</span><label>Secs</label></div>
+            </div>
+        </header>
+
+        <!-- ROLLING CAR SCROLL TIMELINE -->
+        <section id="journey">
+            <div class="section-header">
+                <h2 class="section-title">Our Sacred Journey</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <div class="royal-track">
+                <div class="track-line"></div>
+                <div class="luxury-car-wrapper" id="scrollCar">
+                    <div class="headlight-beam"></div>
+                    <svg viewBox="0 0 140 60" width="140" height="60">
+                        <path d="M15,40 Q35,12 70,10 L105,18 Q132,22 136,40 L136,48 L15,48 Z" fill="#d4af37"/>
+                        <path d="M45,18 L65,18 L65,30 L35,30 Z" fill="#070103" opacity="0.6"/>
+                        <path d="M72,18 L95,20 L92,30 L72,30 Z" fill="#070103" opacity="0.6"/>
+                        <!-- Rotating Wheels -->
+                        <g class="car-wheel" id="wheelBack" transform-origin="35 48">
+                            <circle cx="35" cy="48" r="9" fill="#070103" stroke="#d4af37" stroke-width="3"/>
+                            <line x1="35" y1="39" x2="35" y2="57" stroke="#d4af37" stroke-width="1.5"/>
+                        </g>
+                        <g class="car-wheel" id="wheelFront" transform-origin="105 48">
+                            <circle cx="105" cy="48" r="9" fill="#070103" stroke="#d4af37" stroke-width="3"/>
+                            <line x1="105" y1="39" x2="105" y2="57" stroke="#d4af37" stroke-width="1.5"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="timeline-cards">
+                <div class="glass-card">
+                    <h3>01. Two Worlds</h3>
+                    <p>Destinies originating from distinct paths, brought together by shared values, family blessings, and divine grace.</p>
+                </div>
+                <div class="glass-card">
+                    <h3>02. The Union</h3>
+                    <p>A harmonious blending of traditional values and modern aspirations, bound by everlasting devotion.</p>
+                </div>
+                <div class="glass-card">
+                    <h3>03. Eternal Beginnings</h3>
+                    <p>Stepping into a lifetime of shared dreams, laughter, and endless contentment together.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FUNCTIONS -->
+        <section id="events">
+            <div class="section-header">
+                <h2 class="section-title">The Ceremonies</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <div class="events-grid">
+                <div class="glass-card">
+                    <div class="event-card-header">
+                        <h3>Mehndi & Sangeet</h3>
+                        <div class="event-time"><i class="fa-regular fa-clock"></i> Thursday, Nov 26 | 06:30 PM</div>
+                    </div>
+                    <p><strong>Venue:</strong> The Royal Marquee, Grand Ballroom</p>
+                    <p style="margin-top: 8px;">An evening of vibrant colors, joyful music, and traditional blessings.</p>
+                    <a href="https://maps.google.com" target="_blank" class="btn-gold-action">View Map</a>
+                </div>
+
+                <div class="glass-card" style="border-color: var(--gold-light);">
+                    <div class="event-card-header">
+                        <h3>Baraat & Nikkah</h3>
+                        <div class="event-time"><i class="fa-regular fa-clock"></i> Saturday, Nov 28 | 07:00 PM</div>
+                    </div>
+                    <p><strong>Venue:</strong> Grand Imperial Palace</p>
+                    <p style="margin-top: 8px;">The solemn union and grand celebration surrounded by loved ones.</p>
+                    <a href="https://maps.google.com" target="_blank" class="btn-gold-action">View Map</a>
+                </div>
+
+                <div class="glass-card">
+                    <div class="event-card-header">
+                        <h3>Valima Reception</h3>
+                        <div class="event-time"><i class="fa-regular fa-clock"></i> Sunday, Nov 29 | 08:00 PM</div>
+                    </div>
+                    <p><strong>Venue:</strong> The Imperial Courtyard</p>
+                    <p style="margin-top: 8px;">A royal reception dinner celebrating the beautiful new journey.</p>
+                    <a href="https://maps.google.com" target="_blank" class="btn-gold-action">View Map</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- RSVP & PRAYERS -->
+        <section id="rsvp">
+            <div class="section-header">
+                <h2 class="section-title">RSVP & Guest Prayers</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <div class="glass-card rsvp-wrapper">
+                <form onsubmit="submitRsvp(event)">
+                    <div class="form-group">
+                        <label>Your Full Name</label>
+                        <input type="text" id="guestName" required placeholder="e.g. Dr. Salman Khan">
+                    </div>
+                    <div class="form-group">
+                        <label>Events You Will Attend</label>
+                        <select id="guestEvents">
+                            <option>All Ceremonies</option>
+                            <option>Baraat & Valima Only</option>
+                            <option>Baraat Only</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Your Blessing / Prayer</label>
+                        <textarea id="guestMsg" rows="4" required placeholder="Write your warm wish for the couple..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-gold-action" style="width: 100%; text-align: center; background: var(--gold-metallic); color: #000; font-weight: 700;">Send Prayer & Confirm RSVP</button>
+                </form>
+
+                <div>
+                    <h3 style="font-family: var(--font-heading); color: var(--gold-light); margin-bottom: 20px;">Stream of Blessings</h3>
+                    <div class="prayer-stream" id="prayerStream">
+                        <div class="prayer-card">
+                            <strong style="color: var(--gold-light);">Uncle Tariq & Family</strong>
+                            <p style="color: var(--text-dim); font-size: 0.88rem; margin-top: 5px;">"May Allah (SWT) shower His infinite blessings upon Zaryab and Abu Bakar. Mubarak!"</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <footer>
-        <p>Zaryab & Abu Bakar Wedding — November 2026</p>
-    </footer>
+        <footer>
+            <p>The Wedding Celebration of Zaryab & Abu Bakar — 2026</p>
+        </footer>
+    </div>
 
-    <!-- INTERACTIVE JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT ANIMATION ENGINES -->
     <script>
-        // 1. ENTRANCE FIREWORKS ENGINE (Fires automatically on entrance screen)
-        const efCanvas = document.getElementById('entranceFireworksCanvas');
-        const efCtx = efCanvas.getContext('2d');
-        let entranceParticles = [];
+        // --- 1. FIREWORKS ENGINE FOR ENTRANCE ---
+        const fwCanvas = document.getElementById('fireworksCanvas');
+        const fwCtx = fwCanvas.getContext('2d');
+        let fwParticles = [];
 
-        function resizeEntranceCanvas() {
-            efCanvas.width = window.innerWidth;
-            efCanvas.height = window.innerHeight;
+        function resizeFw() {
+            fwCanvas.width = window.innerWidth;
+            fwCanvas.height = window.innerHeight;
         }
-        window.addEventListener('resize', resizeEntranceCanvas);
-        resizeEntranceCanvas();
+        window.addEventListener('resize', resizeFw);
+        resizeFw();
 
-        class EntranceParticle {
+        class Spark {
             constructor(x, y, color) {
                 this.x = x;
                 this.y = y;
                 this.color = color;
-                this.radius = Math.random() * 3 + 1;
-                this.velocity = {
-                    x: (Math.random() - 0.5) * 8,
-                    y: (Math.random() - 0.5) * 8
-                };
+                this.radius = Math.random() * 2.5 + 1;
+                this.speedX = (Math.random() - 0.5) * 10;
+                this.speedY = (Math.random() - 0.5) * 10;
                 this.alpha = 1;
-                this.friction = 0.95;
-                this.gravity = 0.04;
+                this.friction = 0.96;
+                this.gravity = 0.05;
             }
 
             draw() {
-                efCtx.save();
-                efCtx.globalAlpha = this.alpha;
-                efCtx.beginPath();
-                efCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                efCtx.fillStyle = this.color;
-                efCtx.shadowBlur = 12;
-                efCtx.shadowColor = this.color;
-                efCtx.fill();
-                efCtx.restore();
+                fwCtx.save();
+                fwCtx.globalAlpha = this.alpha;
+                fwCtx.beginPath();
+                fwCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                fwCtx.fillStyle = this.color;
+                fwCtx.shadowBlur = 10;
+                fwCtx.shadowColor = this.color;
+                fwCtx.fill();
+                fwCtx.restore();
             }
 
             update() {
-                this.velocity.x *= this.friction;
-                this.velocity.y *= this.friction;
-                this.velocity.y += this.gravity;
-                this.x += this.velocity.x;
-                this.y += this.velocity.y;
+                this.speedX *= this.friction;
+                this.speedY *= this.friction;
+                this.speedY += this.gravity;
+                this.x += this.speedX;
+                this.y += this.speedY;
                 this.alpha -= 0.015;
             }
         }
 
-        function spawnBurst(x, y) {
-            const colors = ['#d4af37', '#fbe3ad', '#ffffff', '#ff4500', '#e67e22'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            for (let i = 0; i < 40; i++) {
-                entranceParticles.push(new EntranceParticle(x, y, color));
+        function createBurst(x, y) {
+            const palette = ['#fbe3ad', '#d4af37', '#ffffff', '#ff5722', '#e91e63'];
+            const color = palette[Math.floor(Math.random() * palette.length)];
+            for (let i = 0; i < 50; i++) {
+                fwParticles.push(new Spark(x, y, color));
             }
         }
 
-        function renderEntranceFireworks() {
-            efCtx.fillStyle = 'rgba(10, 2, 4, 0.25)';
-            efCtx.fillRect(0, 0, efCanvas.width, efCanvas.height);
+        function loopFireworks() {
+            fwCtx.fillStyle = 'rgba(7, 1, 3, 0.2)';
+            fwCtx.fillRect(0, 0, fwCanvas.width, fwCanvas.height);
 
-            // Continuously shoot fireworks on entrance screen
-            if (Math.random() < 0.08) {
-                spawnBurst(Math.random() * efCanvas.width, Math.random() * (efCanvas.height * 0.6));
+            if (Math.random() < 0.1) {
+                createBurst(Math.random() * fwCanvas.width, Math.random() * (fwCanvas.height * 0.6));
             }
 
-            entranceParticles.forEach((p, idx) => {
+            fwParticles.forEach((p, idx) => {
                 if (p.alpha > 0) {
                     p.update();
                     p.draw();
                 } else {
-                    entranceParticles.splice(idx, 1);
+                    fwParticles.splice(idx, 1);
                 }
             });
-
-            requestAnimationFrame(renderEntranceFireworks);
+            requestAnimationFrame(loopFireworks);
         }
-        renderEntranceFireworks();
+        loopFireworks();
 
-        // 2. OPEN BUTTON & DOOR SPLIT ANIMATION
-        function openWeddingGate() {
-            // Explosive grand fireworks burst
-            for(let i = 0; i < 6; i++) {
-                spawnBurst(Math.random() * efCanvas.width, Math.random() * efCanvas.height * 0.5);
+        // --- 2. 3D FLY-THROUGH OPEN TRANSITION ---
+        function startFlyThrough() {
+            // Explosive bursts
+            for(let i = 0; i < 8; i++) {
+                setTimeout(() => createBurst(Math.random() * fwCanvas.width, Math.random() * fwCanvas.height * 0.7), i * 150);
             }
 
-            // Slide doors open
-            document.getElementById('leftDoor').style.transform = 'translateX(-100%)';
-            document.getElementById('rightDoor').style.transform = 'translateX(100%)';
-            
-            // Fade out door text and button
-            const content = document.getElementById('doorContent');
-            content.style.opacity = '0';
-            content.style.transform = 'scale(0.8)';
+            const wrapper = document.getElementById('entrance-wrapper');
+            wrapper.classList.add('fly-through');
 
-            // Auto play music
+            // Play background music
             const audio = document.getElementById('bgAudio');
-            audio.play().catch(e => console.log("Audio play blocked by browser"));
-            document.getElementById('musicToggle').innerHTML = '❚❚';
+            audio.play().catch(e => console.log("Audio play blocked"));
 
-            // Remove overlay completely after animation
+            // Reveal main app seamlessly
             setTimeout(() => {
-                document.getElementById('entrance-overlay').style.display = 'none';
-            }, 1200);
+                document.getElementById('main-app').style.opacity = '1';
+            }, 600);
+
+            setTimeout(() => {
+                wrapper.style.display = 'none';
+            }, 2200);
         }
 
-        // 3. CANVAS SCRATCH CARD LOGIC FOR DATE REVEAL
+        // --- 3. FLOATING PETALS & GOLD DUST ENGINE ---
+        const ptCanvas = document.getElementById('petalsCanvas');
+        const ptCtx = ptCanvas.getContext('2d');
+        let petals = [];
+
+        function resizePt() {
+            ptCanvas.width = window.innerWidth;
+            ptCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizePt);
+        resizePt();
+
+        class Petal {
+            constructor() {
+                this.x = Math.random() * ptCanvas.width;
+                this.y = Math.random() * ptCanvas.height;
+                this.size = Math.random() * 5 + 3;
+                this.speedY = Math.random() * 1 + 0.5;
+                this.speedX = Math.random() * 0.6 - 0.3;
+                this.angle = Math.random() * 360;
+                this.spin = Math.random() * 2 - 1;
+                this.color = Math.random() > 0.4 ? '#d4af37' : '#6e0f1b';
+            }
+
+            draw() {
+                ptCtx.save();
+                ptCtx.translate(this.x, this.y);
+                ptCtx.rotate(this.angle * Math.PI / 180);
+                ptCtx.fillStyle = this.color;
+                ptCtx.globalAlpha = 0.6;
+                ptCtx.beginPath();
+                ptCtx.ellipse(0, 0, this.size, this.size / 2, 0, 0, Math.PI * 2);
+                ptCtx.fill();
+                ptCtx.restore();
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.angle += this.spin;
+
+                if (this.y > ptCanvas.height) {
+                    this.y = -10;
+                    this.x = Math.random() * ptCanvas.width;
+                }
+            }
+        }
+
+        for (let i = 0; i < 45; i++) petals.push(new Petal());
+
+        function loopPetals() {
+            ptCtx.clearRect(0, 0, ptCanvas.width, ptCanvas.height);
+            petals.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(loopPetals);
+        }
+        loopPetals();
+
+        // --- 4. SCRATCH CARD ENGINE ---
         const scratchCanvas = document.getElementById('scratchCanvas');
         const sCtx = scratchCanvas.getContext('2d');
         let isScratching = false;
 
-        function initScratchCard() {
-            // Fill with gold foil background
+        function initScratch() {
             sCtx.fillStyle = '#d4af37';
             sCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
 
-            // Add texture & text on top of foil
-            sCtx.fillStyle = '#120406';
-            sCtx.font = 'bold 14px sans-serif';
+            // Gold foil shimmering text pattern
+            sCtx.fillStyle = '#17050a';
+            sCtx.font = '600 13px sans-serif';
             sCtx.textAlign = 'center';
-            sCtx.fillText('✨ SCRATCH WITH FINGER / MOUSE ✨', scratchCanvas.width / 2, scratchCanvas.height / 2 + 5);
+            sCtx.fillText('✨ RUB OR SCRATCH TO REVEAL ✨', scratchCanvas.width / 2, scratchCanvas.height / 2 + 5);
         }
-        initScratchCard();
+        initScratch();
 
         function scratch(e) {
             if (!isScratching) return;
@@ -804,56 +1037,58 @@
         scratchCanvas.addEventListener('touchend', () => isScratching = false);
         scratchCanvas.addEventListener('touchmove', scratch);
 
-        // 4. SCROLL DRIVEN VEHICLE MOVEMENT
+        // --- 5. ROLLING CAR SCROLL & WHEEL ROTATION ---
         window.addEventListener('scroll', () => {
             const scrollPos = window.scrollY;
             const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
             const progress = (scrollPos / maxScroll);
+
             const car = document.getElementById('scrollCar');
             if (car) {
-                car.style.left = Math.min(progress * 90, 88) + '%';
+                car.style.left = Math.min(progress * 88, 86) + '%';
             }
+
+            const rot = scrollPos * 1.5;
+            document.getElementById('wheelBack').style.transform = `rotate(${rot}deg)`;
+            document.getElementById('wheelFront').style.transform = `rotate(${rot}deg)`;
         });
 
-        // 5. COUNTDOWN TIMER
-        const targetDate = new Date("Nov 28, 2026 19:00:00").getTime();
+        // --- 6. COUNTDOWN ENGINE ---
+        const target = new Date("Nov 28, 2026 19:00:00").getTime();
         setInterval(() => {
             const now = new Date().getTime();
-            const diff = targetDate - now;
+            const diff = target - now;
             if (diff > 0) {
-                document.getElementById('days').innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
-                document.getElementById('hours').innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
-                document.getElementById('mins').innerText = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-                document.getElementById('secs').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+                document.getElementById('cd-days').innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
+                document.getElementById('cd-hours').innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                document.getElementById('cd-mins').innerText = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                document.getElementById('cd-secs').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
             }
         }, 1000);
 
-        // 6. AUDIO TOGGLE
+        // --- 7. AUDIO TOGGLE ---
         function toggleAudio() {
             const audio = document.getElementById('bgAudio');
-            const btn = document.getElementById('musicToggle');
             if (audio.paused) {
                 audio.play();
-                btn.innerHTML = '❚❚';
             } else {
                 audio.pause();
-                btn.innerHTML = '♫';
             }
         }
 
-        // 7. RSVP PRAYER SUBMISSION
-        function submitWish(e) {
+        // --- 8. RSVP FORM SUBMISSION ---
+        function submitRsvp(e) {
             e.preventDefault();
             const name = document.getElementById('guestName').value;
             const msg = document.getElementById('guestMsg').value;
 
-            const list = document.getElementById('wishList');
-            const item = document.createElement('div');
-            item.className = 'wish-item';
-            item.innerHTML = `<strong style="color: var(--gold-light);">${name}</strong><p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 4px;">"${msg}"</p>`;
-            list.prepend(item);
+            const stream = document.getElementById('prayerStream');
+            const card = document.createElement('div');
+            card.className = 'prayer-card';
+            card.innerHTML = `<strong style="color: var(--gold-light);">${name}</strong><p style="color: var(--text-dim); font-size: 0.88rem; margin-top: 5px;">"${msg}"</p>`;
+            stream.prepend(card);
 
-            alert("Thank you! Your RSVP and wish have been recorded.");
+            alert("Thank you! Your RSVP and heartfelt blessing have been recorded.");
             e.target.reset();
         }
     </script>
